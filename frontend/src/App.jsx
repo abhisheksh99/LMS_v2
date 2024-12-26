@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import MainLayout from "./layout/MainLayout";
 import HeroSection from "./pages/Student/HeroSection";
+import MyLearning from "./pages/Student/MyLearning";
+import Profile from "./pages/Student/Profile";
 
 const App = () => {
   return (
@@ -19,7 +21,11 @@ const App = () => {
           {/* Route for the Login page */}
           <Route path="/login" element={<Login />} />
 
-
+          {/* Student Routes */}
+          {/* My Learning page: Displays courses the student is enrolled in */}
+          <Route path="/my-learning" element={<MyLearning />} />
+          {/* Profile page: Allows students to edit and view their profile */}
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
     </div>
