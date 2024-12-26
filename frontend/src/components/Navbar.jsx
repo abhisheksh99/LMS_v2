@@ -163,7 +163,7 @@ const MobileNavbar = ({ user, onLogout }) => {
           ) : (
             <>
               <Link to="/login">Login</Link>
-              <Link to="/signup">Signup</Link>
+              <Link to="/login">Signup</Link>
             </>
           )}
         </nav>
