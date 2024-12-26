@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from "dotenv"
 import connectDB from './config/db.js';
+import userRoutes from "./routes/userRoute.js"
 dotenv.config();
 
 const app = express();
@@ -15,10 +16,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Basic root route
-app.get('/', (req, res) => {
-  res.json({ message: 'Server is running' });
-});
+
+app.use("/api/v1/user",userRoutes)
 
 // Start server
 app.listen(PORT, () => {
