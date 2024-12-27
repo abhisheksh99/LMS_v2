@@ -3,7 +3,7 @@ import Course from './Course';
 
 const MyLearning = () => {
     const isLoading = false;
-    const myLearning = [];
+    const myLearning = [1,2];
 
     const MyLearningSkeleton = () => (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
