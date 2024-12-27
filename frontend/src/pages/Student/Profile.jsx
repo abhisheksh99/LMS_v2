@@ -13,16 +13,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import Course from "./Course";
-import { useGetUserProfileByIdQuery, useUpdateUserProfileByIdMutation } from "@/store/api/authApiSlice";
 import { toast } from "react-toastify";
+import {
+  useGetUserProfileByIdQuery,
+  useUpdateUserProfileByIdMutation,
+} from "@/store/api/authApiSlice";
 
 const Profile = () => {
   const [name, setName] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data, isLoading, error, refetch } = useGetUserProfileByIdQuery();
-  const [updateUserProfile, { isLoading: updateUserIsLoading, error: updateError, isSuccess, data: updateData }] = useUpdateUserProfileByIdMutation();
+  // Force refetch on component mount and after updates
+  const { data, isLoading, error, refetch } = useGetUserProfileByIdQuery(undefined, {
+    refetchOnMountOrArgChange: true
+  });
+  
+  const user = data?.user;
+
+  const [
+    updateUserProfile,
+    { isLoading: updateUserIsLoading, error: updateError, isSuccess }
+  ] = useUpdateUserProfileByIdMutation();
 
   const onChangeHandler = (e) => {
     const file = e.target.files?.[0];
@@ -32,27 +44,37 @@ const Profile = () => {
   };
 
   const updateUserHandler = async () => {
+    if (!name.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", name);
     if (profilePhoto) formData.append("profilePhoto", profilePhoto);
-    await updateUserProfile(formData);
+
+    try {
+      await updateUserProfile(formData).unwrap();
+      setIsDialogOpen(false);
+      setProfilePhoto(null);
+      // Force immediate refetch after successful update
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to update profile");
+    }
   };
 
   useEffect(() => {
     if (isSuccess) {
-      refetch();
-      toast.success(updateData?.message || "Profile Updated");
+      toast.success("Profile Updated Successfully");
     }
-    if (updateError) {
-      toast.error(updateError?.data?.message || "Failed to update profile");
-    }
-  }, [updateData, updateError, isSuccess, refetch]);
+  }, [isSuccess]);
 
   useEffect(() => {
-    if (data?.user) {
-      setName(data.user.name);
+    if (user) {
+      setName(user.name);
     }
-  }, [data]);
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -74,8 +96,6 @@ const Profile = () => {
       </div>
     );
   }
-
-  const user = data?.user;
 
   return (
     <div className="max-w-4xl mx-auto px-4 my-10">
@@ -112,7 +132,7 @@ const Profile = () => {
               </span>
             </h1>
           </div>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="mt-2">
                 Edit Profile
@@ -148,32 +168,11 @@ const Profile = () => {
               </div>
               <DialogFooter>
                 <Button disabled={updateUserIsLoading} onClick={updateUserHandler}>
-                  {updateUserIsLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Please wait...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
+                  {updateUserIsLoading ? <Loader2 className="animate-spin" /> : "Save"}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
-
-      {/* Courses Section */}
-      <div>
-        <h1 className="font-medium text-lg">Courses you're enrolled in</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-5">
-          {user?.enrolledCourses?.length === 0 ? (
-            <h1>You haven't enrolled in any courses yet</h1>
-          ) : (
-            user?.enrolledCourses?.map((course) => (
-              <Course course={course} key={course._id} />
-            ))
-          )}
         </div>
       </div>
     </div>
