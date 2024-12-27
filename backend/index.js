@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from "dotenv"
 import connectDB from './config/db.js';
 import userRoutes from "./routes/userRoute.js"
+import courseRoutes from "./routes/courseRoute.js"
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use("/api/v1/user",userRoutes)
+app.use("/api/v1/course",courseRoutes)
 
 // Start server
 app.listen(PORT, () => {
