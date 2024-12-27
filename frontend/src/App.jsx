@@ -6,6 +6,10 @@ import MainLayout from "./layout/MainLayout";
 import HeroSection from "./pages/Student/HeroSection";
 import MyLearning from "./pages/Student/MyLearning";
 import Profile from "./pages/Student/Profile";
+import Sidebar from "./pages/Admin/SideBar";
+import Dashboard from "./pages/Admin/Dashboard";
+import AddCourse from "./pages/Admin/Course/AddCourse";
+import CourseTable from "./pages/Admin/Course/CourseTable";
 
 const App = () => {
   return (
@@ -26,6 +30,17 @@ const App = () => {
           <Route path="/my-learning" element={<MyLearning />} />
           {/* Profile page: Allows students to edit and view their profile */}
           <Route path="/profile" element={<Profile />} />
+
+          {/* Admin Routes */}
+          {/* Admin layout with a sidebar for navigation */}
+          <Route path="/admin" element={<Sidebar />}>
+            {/* Admin dashboard route */}
+            <Route path="dashboard" element={<Dashboard />} />
+            {/* Courses table route */}
+            <Route path="courses" element={<CourseTable />} />
+            {/* Add a new course */}
+            <Route path="courses/create" element={<AddCourse />} />
+          </Route>
         </Routes>
       </div>
     </div>
