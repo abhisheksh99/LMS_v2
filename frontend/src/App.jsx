@@ -10,6 +10,7 @@ import Sidebar from "./pages/Admin/SideBar";
 import Dashboard from "./pages/Admin/Dashboard";
 import AddCourse from "./pages/Admin/Course/AddCourse";
 import CourseTable from "./pages/Admin/Course/CourseTable";
+import EditCourse from "./pages/Admin/Course/EditCourse";
 
 const App = () => {
   return (
@@ -40,6 +41,8 @@ const App = () => {
             <Route path="courses" element={<CourseTable />} />
             {/* Add a new course */}
             <Route path="courses/create" element={<AddCourse />} />
+            {/* Edit an existing course by courseId */}
+            <Route path="courses/:courseId" element={<EditCourse />} />
           </Route>
         </Routes>
       </div>
