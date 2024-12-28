@@ -25,4 +25,20 @@ export const createCourse = asyncHandler(async (req, res) => {
   });
 });
 
+export const getCreatorCourses = asyncHandler(async(req,res)=>{
+  const userId = req.id;
+  const courses = await Course.find({creator:userId});
+  
+  if(!courses || courses.length === 0){
+    return res.status(404).json({
+      message: "No courses found for this creator",
+      success: false
+    });
+  }
 
+  res.status(200).json({
+    message: "Courses retrieved successfully",
+    success: true,
+    courses
+  });
+});
