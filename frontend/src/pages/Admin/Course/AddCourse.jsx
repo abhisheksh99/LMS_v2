@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,28 +10,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { useCreateCourseMutation } from "@/store/api/courseApiSlice";
+import { toast } from "react-toastify";
 
 const AddCourse = () => {
   const [courseTitle, setCourseTitle] = useState("");
   const [category, setCategory] = useState("");
-  const isLoading = false;
+
+  const [createCourse, { data, isLoading, error, isSuccess }] = useCreateCourseMutation();
+  
   const navigate = useNavigate();
 
   const getSelectedCategory = (value) => {
     setCategory(value);
   };
 
-  const createCourseHandler = () => {
-    console.log(courseTitle, category);
+  const createCourseHandler = async() => {
+    await createCourse({ courseTitle, category });
   };
+  console.log('Creating course:', { courseTitle, category });
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data?.message || "Course created");
+      navigate("/admin/courses");
+    } else if (error) {
+      toast.error(error?.data?.message || "An error occurred");
+    }
+  }, [isSuccess, error, data, navigate]);
 
   return (
     <div className="flex-1 mx-10">
       <div className="mb-4">
         <h1 className="font-bold text-xl">
-          {" "}
           Let's add a course, add some basic course details for your new course
         </h1>
         <p className="text-sm">
@@ -40,19 +53,19 @@ const AddCourse = () => {
           structure and categorize your course effectively.
         </p>
       </div>
-      <div className="space-y-4s">
+      <div className="space-y-4">
         <div>
-          <Label>Title</Label>
+          <Label htmlFor="courseTitle">Title</Label>
           <Input
+            id="courseTitle"
             type="text"
-            name="courseTitle"
             placeholder="Your Course Name"
             value={courseTitle}
             onChange={(e) => setCourseTitle(e.target.value)}
           />
         </div>
         <div>
-          <Label>Category</Label>
+          <Label htmlFor="category">Category</Label>
           <Select onValueChange={getSelectedCategory}>
             <SelectTrigger id="category" className="w-full">
               <SelectValue placeholder="Select a category" />
@@ -115,7 +128,7 @@ const AddCourse = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-2 mt-5">
+        <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate("/admin/courses")}>
             Back
           </Button>

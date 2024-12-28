@@ -12,16 +12,28 @@ import {
   TableRow
 } from '@/components/ui/table'
 import { useNavigate } from 'react-router-dom'
+import { useGetCreatorCoursesQuery } from '@/store/api/courseApiSlice'
 
 const CourseTable = () => {
-  const navigate=useNavigate();
+    const navigate=useNavigate();
+    const {data,isLoading, isError} = useGetCreatorCoursesQuery();
+    console.log(data);
+    
 
- 
-  const courses=[1,2];
+    if(isLoading){
+        return  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    }
+   
+    if (isError || !data || !data.courses) {
+      return <div>No courses found or an error occurred.</div>;
+  }
+    
+
+
   return (
     <div>
-      <Button onClick={() => navigate(`create`)} >Create a new Courses</Button>
-      <Table className="mt-5">
+      <Button onClick={() => navigate(`create`)}>Create a new course</Button>
+      <Table>
         <TableCaption>A list of your recent courses.</TableCaption>
         <TableHeader>
           <TableRow>
@@ -32,7 +44,7 @@ const CourseTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {courses.map((course) => (
+          {data.courses.map((course) => (
             <TableRow key={course._id}>
               <TableCell className="font-medium">{course?.coursePrice || "NA"}</TableCell>
               <TableCell> <Badge>{course.isPublished ? "Published" : "Draft"}</Badge> </TableCell>
@@ -45,7 +57,7 @@ const CourseTable = () => {
         </TableBody>
       </Table>
     </div>
-  );
-};
+  )
+}
 
-export default CourseTable;
+export default CourseTable
