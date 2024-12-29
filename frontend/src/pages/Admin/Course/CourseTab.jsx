@@ -133,11 +133,17 @@ const CourseTab = () => {
   const ontogglePublishStatus = async () => {
     try {
       const publishStatus = !input.isPublished;
-      await togglePublishStatus({ courseId, publish: publishStatus }).unwrap();
+      // Fix: Change the parameter to use 'query' instead of 'publish'
+      await togglePublishStatus({ 
+        courseId, 
+        query: publishStatus 
+      }).unwrap();
+      
       setInput((prevInput) => ({
         ...prevInput,
         isPublished: publishStatus,
       }));
+      
       toast.success(
         publishStatus
           ? "Course published successfully!"
@@ -147,7 +153,6 @@ const CourseTab = () => {
       toast.error(err?.data?.message || "Failed to update publish status");
     }
   };
-
   const updateCourseHandler = async () => {
     try {
       const formData = new FormData();
