@@ -1,39 +1,38 @@
 import asyncHandler from "express-async-handler";
 import Course from "../models/courseModel.js";
 import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
+import Lecture from "../models/lectureModel.js";
 
+// Create a new course
 export const createCourse = asyncHandler(async (req, res) => {
   const { courseTitle, category } = req.body;
 
+  // Validate input
   if (!courseTitle || !category) {
-    return res.status(400).json({
-      message: "Course title and category are required",
-      success: false,
-    });
+    return res.status(400).json({ message: "Course title and category are required", success: false });
   }
 
   const newCourse = await Course.create({
     courseTitle,
     category,
-    creator: req.id,
+    creator: req.id 
   });
-  
+
   res.status(201).json({
     message: "Course created successfully",
     success: true,
-    course: newCourse,
+    course: newCourse
   });
 });
 
-export const getCreatorCourses = asyncHandler(async(req,res)=>{
+// Get courses created by the user
+export const getCreatorCourses = asyncHandler(async (req, res) => {
   const userId = req.id;
-  const courses = await Course.find({creator:userId});
   
-  if(!courses || courses.length === 0){
-    return res.status(404).json({
-      message: "No courses found for this creator",
-      success: false
-    });
+  const courses = await Course.find({ creator: userId });
+
+  if (!courses || courses.length === 0) {
+    return res.status(404).json({ message: "No courses found", success: false });
   }
 
   res.status(200).json({
@@ -43,10 +42,11 @@ export const getCreatorCourses = asyncHandler(async(req,res)=>{
   });
 });
 
-export const editCourse = asyncHandler(async(req, res)=> {
+// Edit an existing course
+export const editCourse = asyncHandler(async (req, res) => {
+  const courseId = req.params.courseId;
   const { courseTitle, subTitle, description, category, courseLevel, coursePrice } = req.body;
   const thumbnail = req.file;
-  const courseId = req.params.courseId;
 
   // Find the course by ID
   let course = await Course.findById(courseId);
@@ -169,10 +169,12 @@ export const removeCourse = asyncHandler(async (req, res) => {
     });
   }
 
-  // Find the course by ID
-  const course = await Course.findById(courseId);
+  // Delete all lectures associated with the course
+  await Lecture.deleteMany({ courseId });
 
-  // Check if course exists
+  // Delete the course
+  const course = await Course.findByIdAndDelete(courseId);
+
   if (!course) {
     return res.status(404).json({
       success: false,
@@ -180,12 +182,30 @@ export const removeCourse = asyncHandler(async (req, res) => {
     });
   }
 
-  // Delete the course
-  await Course.findByIdAndDelete(courseId);
-
-  // Send success response
   res.status(200).json({
     success: true,
-    message: "Course deleted successfully.",
+    message: "Course and its lectures removed successfully.",
   });
 });
+
+export const getPublishedCourses = asyncHandler(async(req,res)=>{
+    // Fetch all published courses
+    const courses = await Course.find({ isPublished: true }).populate("creator", "name photoUrl");
+
+    // Check if no courses were found
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No published courses found.",
+      });
+    }
+
+    // Return the list of published courses
+    res.status(200).json({
+      success: true,
+      courses
+
+    });
+    
+    
+})
