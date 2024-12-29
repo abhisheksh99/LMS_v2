@@ -5,6 +5,7 @@ import dotenv from "dotenv"
 import connectDB from './config/db.js';
 import userRoutes from "./routes/userRoute.js"
 import courseRoutes from "./routes/courseRoute.js"
+import mediaRoutes from "./routes/mediaRoute.js";
 dotenv.config();
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/user",userRoutes)
 app.use("/api/v1/course",courseRoutes)
+app.use("/api/v1/media", mediaRoutes);
 
 // Start server
 app.listen(PORT, () => {
