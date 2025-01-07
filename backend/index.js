@@ -7,6 +7,8 @@ import userRoutes from "./routes/userRoute.js"
 import courseRoutes from "./routes/courseRoute.js"
 import mediaRoutes from "./routes/mediaRoute.js";
 import coursePurchaseRoutes from "./routes/coursePurchaseRoute.js" 
+import courseProgressRoutes from "./routes/courseProgressRoute.js"
+
 dotenv.config();
 
 const app = express();
@@ -28,6 +30,7 @@ app.use("/api/v1/user",userRoutes)
 app.use("/api/v1/course",courseRoutes)
 app.use("/api/v1/media", mediaRoutes);
 app.use("/api/v1/purchase", coursePurchaseRoutes);
+app.use("/api/v1/progress", courseProgressRoutes);
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
