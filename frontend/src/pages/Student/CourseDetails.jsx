@@ -1,42 +1,67 @@
+
 import React from "react";
-import { BadgeInfoIcon, Lock, PlayCircle } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/Card";
 import ReactPlayer from "react-player";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
+import BuyCourseButton from "@/components/BuyCourseButton";
+import { BadgeInfoIcon, Lock, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import BuyCourseButton from "@/components/BuyCourseButton";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetCourseDetailWithStatusQuery } from "@/store/api/coursePurchaseApiSlice";
 
-const CourseDetails = () => {
-  const lectures = [1, 2, 3];
-  const purchased = false;
-  const course = {
-    description: "Sample Description",
-    lectures: [{ lectureTitle: "Lecture 1", videoUrl: "" }],
-    coursePrice: 99.99,
-    _id: "sample-id"
-  };
+const CourseDetail = () => {
+  const params = useParams();
+  const courseId = params.courseId; // Extract courseId from URL params
+  const navigate = useNavigate();
 
+  const { data, isLoading, isError } =
+    useGetCourseDetailWithStatusQuery(courseId);
+
+  if (isLoading) return <h1>Loading...</h1>;
+  if (isError) return <h1>Failed to load course details</h1>;
+
+  // Destructure response data
+  const { course, purchased } = data;
+
+  // Handle continue course button click
   const handleContinueCourse = () => {
-    // Placeholder function
+    if (purchased) {
+      navigate(`/course-progress/${course._id}`);
+    }
   };
 
   return (
-    <div className="mt-20 space-y-5">
+    <div className="space-y-5">
+      {/* Course Header */}
       <div className="bg-[#2D2F31] text-white">
         <div className="max-w-7xl mx-auto py-8 px-4 md:px-8 flex flex-col gap-2">
-          <h1 className="font-bold text-2xl md:text-3xl">Course Title</h1>
-          <p className="text-base md:text-lg">Subtitle</p>
+          <h1 className="font-bold text-2xl md:text-3xl">
+            {course.courseTitle}
+          </h1>
+          <p className="text-base md:text-lg">{course.subTitle}</p>
           <p>
             Created By{" "}
-            <span className="text-[#C0C4FC] underline italic">Abhishek</span>
+            <span className="text-[#C0C4FC] underline italic">
+              {course.creator?.name}
+            </span>
           </p>
           <div className="flex items-center gap-2 text-sm">
             <BadgeInfoIcon size={16} />
-            <p>Last updated</p>
+            <p>
+              Last updated {new Date(course.updatedAt).toLocaleDateString()}
+            </p>
           </div>
-          <p>Students enrolled:</p>
+          <p>Students enrolled: {course.enrolledStudents.length}</p>
         </div>
       </div>
+
       {/* Course Details Section */}
       <div className="max-w-7xl mx-auto my-5 px-4 md:px-8 flex flex-col lg:flex-row justify-between gap-10">
         {/* Left Section: Course Description and Content */}
@@ -54,17 +79,18 @@ const CourseDetails = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {lectures.map((lecture, idx) => (
+              {course.lectures.map((lecture, idx) => (
                 <div key={idx} className="flex items-center gap-3 text-sm">
                   <span>
                     {purchased ? <PlayCircle size={14} /> : <Lock size={14} />}
                   </span>
-                  <p>lecturetitle</p>
+                  <p>{lecture.lectureTitle}</p>
                 </div>
               ))}
             </CardContent>
           </Card>
         </div>
+
         {/* Right Section: Video Player and Purchase/Continue Button */}
         <div className="w-full lg:w-1/3">
           <Card>
@@ -107,4 +133,4 @@ const CourseDetails = () => {
   );
 };
 
-export default CourseDetails;
+export default CourseDetail;
