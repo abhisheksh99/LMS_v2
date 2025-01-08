@@ -23,7 +23,7 @@ export const coursePurchaseApiSlice = apiSlice.injectEndpoints({
     // Query for getting all purchased courses
     getPurchasedCourses: builder.query({
       query: () => ({
-        url: `/purchase`,
+        url: `/purchase/`,
         method: "GET",
       }),
     }),

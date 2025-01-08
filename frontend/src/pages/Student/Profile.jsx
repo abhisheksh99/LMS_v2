@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,28 +13,22 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import { toast } from "react-toastify";
+import { Loader, Loader2 } from "lucide-react";
+import Course from "./Course";
 import {
   useGetUserProfileByIdQuery,
   useUpdateUserProfileByIdMutation,
 } from "@/store/api/authApiSlice";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const [name, setName] = useState("");
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState("");
 
-  // Force refetch on component mount and after updates
-  const { data, isLoading, error, refetch } = useGetUserProfileByIdQuery(undefined, {
-    refetchOnMountOrArgChange: true
-  });
-  
-  const user = data?.user;
-
+  const { data, isLoading, error, refetch } = useGetUserProfileByIdQuery();
   const [
-    updateUserProfile,
-    { isLoading: updateUserIsLoading, error: updateError, isSuccess }
+    updateUserProfileById,
+    { data: updateUserData, isLoading: isUpdating, error: updateError, isSuccess },
   ] = useUpdateUserProfileByIdMutation();
 
   const onChangeHandler = (e) => {
@@ -44,42 +39,32 @@ const Profile = () => {
   };
 
   const updateUserHandler = async () => {
-    if (!name.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("name", name);
-    if (profilePhoto) formData.append("profilePhoto", profilePhoto);
-
-    try {
-      await updateUserProfile(formData).unwrap();
-      setIsDialogOpen(false);
-      setProfilePhoto(null);
-      // Force immediate refetch after successful update
-      await refetch();
-    } catch (err) {
-      toast.error(err?.data?.message || "Failed to update profile");
-    }
+    formData.append("profilePhoto", profilePhoto);
+    await updateUserProfileById(formData);
   };
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Profile Updated Successfully");
+      refetch();
+      toast.success(updateUserData?.message || "Profile Updated");
     }
-  }, [isSuccess]);
+    if (updateError) {
+      toast.error(updateError?.data?.message || "Failed to update Profile");
+    }
+  }, [updateUserData, updateError, isSuccess, refetch]);
 
   useEffect(() => {
-    if (user) {
-      setName(user.name);
+    if (data?.user) {
+      setName(data.user.name);
     }
-  }, [user]);
+  }, [data]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -96,6 +81,8 @@ const Profile = () => {
       </div>
     );
   }
+
+  const user = data?.user;
 
   return (
     <div className="max-w-4xl mx-auto px-4 my-10">
@@ -132,7 +119,7 @@ const Profile = () => {
               </span>
             </h1>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog>
             <DialogTrigger asChild>
               <Button size="sm" className="mt-2">
                 Edit Profile
@@ -167,12 +154,33 @@ const Profile = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button disabled={updateUserIsLoading} onClick={updateUserHandler}>
-                  {updateUserIsLoading ? <Loader2 className="animate-spin" /> : "Save"}
+                <Button disabled={isUpdating} onClick={updateUserHandler}>
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Please wait...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        </div>
+      </div>
+
+      {/* Courses Section */}
+      <div>
+        <h1 className="font-medium text-lg">Courses you're enrolled in</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-5">
+          {user?.enrolledCourses?.length === 0 ? (
+            <h1>You haven't enrolled in any courses yet</h1>
+          ) : (
+            user?.enrolledCourses?.map((course) => (
+              <Course course={course} key={course._id} />
+            ))
+          )}
         </div>
       </div>
     </div>
