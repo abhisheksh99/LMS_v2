@@ -90,7 +90,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
 export const getUserProfileById = asyncHandler(async (req, res) => {
   const id = req.id;
-  const user = await User.findById(id).select("-password");
+  const user = await User.findById(id).select("-password").populate("enrolledCourses");
   
   if (!user) {
     return res.status(404).json({
